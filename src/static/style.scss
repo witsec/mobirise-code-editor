@@ -1,0 +1,10 @@
+$color-info: #d9edf7;
+$color-error: #f2dede;
+
+.dp-modal {
+  @media (min-width: 768px) {
+    .modal-dialog {
+      width: 1200px;
+    }
+  }
+}

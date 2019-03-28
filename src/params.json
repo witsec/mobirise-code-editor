@@ -1,0 +1,16 @@
+{
+    "name": "Code Editor v0.1",
+    "alias": "witsec-code-editor",
+    "version": 0.1,
+    "minAppVersion": "4",	
+    "appScript": true,
+	"dependencies": [
+        "static/style.css",
+		"static/depend.js",
+		"static/agate.css",
+		"static/highlight.pack.js"
+    ],
+	"coreScript" : false,
+	"description":"Edit any block you like. <a href='https://witsec.nl'>Learn more...</a>",
+	"logo":"thumbnail.png"
+}
