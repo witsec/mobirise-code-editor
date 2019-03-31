@@ -1,7 +1,7 @@
 (function(jQuery, mbrApp) {
 
 	var curr = null;
-	var editorHTML, editorCSS;
+	var editorHTML, editorCSS, compIndex;
     mbrApp.regExtension({
         name: "witsec-code-editor",
         events: {
@@ -83,10 +83,20 @@
 
 				// Click handler for "edit code" icon
 				a.$template.on("click", ".witsec-code-editor-editbutton", function(e) {
+					// Re-create component index (this is an internal list only which refers to the actual index, so we don't have to fiddle with that)
+					compIndex = [];
+					for (index in mbrApp.Core.resultJSON[mbrApp.Core.currentPage].components){
+						var comp = mbrApp.Core.resultJSON[mbrApp.Core.currentPage].components[index];
+						if (comp._once == "menu")
+							compIndex.unshift(index);
+						else
+							compIndex.push(index);
+					}
+
 					// Find the index of the clicked icon
 					a.$template.find('.witsec-code-editor-editbutton').each(function(index, obj) {
 						if (e.target == obj) {
-							curr = mbrApp.Core.resultJSON[mbrApp.Core.currentPage].components[index];
+							curr = mbrApp.Core.resultJSON[mbrApp.Core.currentPage].components[ compIndex[index] ];
 						}
 					});
 
@@ -146,9 +156,10 @@
 						curr._styles = styles;
 
 						// Save
+						var currentPage = mbrApp.Core.currentPage;
 						mbrApp.runSaveProject(function() {
 							mbrApp.loadRecentProject(function(){
-								$("a[data-page='" + mbrApp.Core.currentPage + "']").trigger("click")
+								$("a[data-page='" + currentPage + "']").trigger("click")
 							});
 						});
 					}
