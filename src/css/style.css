@@ -1,0 +1,45 @@
+#witsec-code-editor {
+  height: 0%;
+  width: 100%;
+  color: #fff;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #2b303d;
+  overflow-y: hidden;
+  transition: 0.4s;
+  z-index: 1201;  /* Needs to be above the "add block" and below the "alertDlg" zindex */
+}
+
+.witsec-code-editor-header {
+  height: 40px;
+  padding: 2px 10px 2px 10px;
+  margin: 0px;
+  background-color: #34424e;
+}
+
+.witsec-code-editor-row,
+.witsec-code-editor-col {
+  padding: 0px;
+  margin: 0px;
+}
+
+.witsec-code-editor-save {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 5000; /* High zindex, otherwise you can't click them */
+}
+
+.witsec-code-editor-cancel {
+  position: absolute;
+  right: 90px;
+  bottom: 24px;
+  z-index: 5000; /* High zindex, otherwise you can't click them */
+}
+
+/* From lint-[version].min.css */
+.CodeMirror-lint-tooltip {
+  z-index:5000 !important; /* High zindex, otherwise the tooltips are behind the editor */
+}
