@@ -189,15 +189,15 @@
 
 				// "Encode" PHP - if we don't obfuscate PHP code, Mobirise tends to rem it out
 				EncodePHP = function(php) {
-					php = php.replace(/<\?/g, "<!--[PHP]<?");
-					php = php.replace(/\?>/g, "?>[/PHP]-->");
+					php = php.replace(/<\?/g, "<!--[PHP-CE]<?");
+					php = php.replace(/\?>/g, "?>[/PHP-CE]-->");
 					return php;
 				}
 
 				// "Decode" PHP
 				DecodePHP = function(php) {
-					php = php.replace(/<!--\[PHP\]<\?/g, "<?");
-					php = php.replace(/\?>\[\/PHP\]-->/g, "?>");
+					php = php.replace(/<!--\[PHP-CE\]<\?/g, "<?");
+					php = php.replace(/\?>\[\/PHP-CE\]-->/g, "?>");
 					return php;
 				}
             }
