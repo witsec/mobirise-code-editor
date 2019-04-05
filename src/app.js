@@ -29,7 +29,7 @@
 
 				// Do stuff to load all required js files (doing it this way somehow ensures all files are loaded properly, while using params.json often messes things up...)
 				var dir = mbrApp.getAddonDir("witsec-code-editor");
-				var scrarr = ["codemirror-5.44.0.min.js", "jshint-2.10.2.min.js", "lint-javascript-lint-5.44.0.min.js", "lint-lint-5.44.0.min.js", "addon-active-line-5.44.0.min.js", "mode-css-5.44.0.min.js", "mode-htmlmixed-5.44.0.min.js", "mode-javascript-5.44.0.min.js", "mode-xml-5.44.0.min.js"];
+				var scrarr = ["codemirror-5.44.0.min.js", "jshint-2.10.2.min.js", "lint-javascript-lint-5.44.0.min.js", "lint-lint-5.44.0.min.js", "addon-active-line-5.44.0.min.js", "mode-clike-5.44.0.min.js", "mode-css-5.44.0.min.js", "mode-htmlmixed-5.44.0.min.js", "mode-javascript-5.44.0.min.js", "mode-php-5.44.0.min.js", "mode-xml-5.44.0.min.js"];
 
 				var scrhtml = "";
 				scrarr.forEach(s => {
@@ -63,7 +63,7 @@
 						styleActiveLine: true,
 						lineNumbers: true,
 						lineWrapping: false,
-						mode: "htmlmixed",
+						mode: "application/x-httpd-php",
 						theme: "solarized dark",
 						lint: true,
 						gutters: ["CodeMirror-lint-markers"]
@@ -113,7 +113,7 @@
 					}
 
 					// Fill HTML and CSS here...
-					editorHTML.setValue(curr._customHTML);
+					editorHTML.setValue(DecodePHP(curr._customHTML));
 					editorCSS.setValue(JSON.stringify(curr._styles, undefined, 2));
 
 					// Clear history, so ctrl-z doesn't empty the editors
@@ -126,6 +126,9 @@
 					// Set editors to fill 100% of the div they're in
 					editorHTML.setSize("100%", "100%");
 					editorCSS.setSize("100%", "100%");
+
+					// In case the component params are visible, hide them
+					mbrApp.hideComponentParams();
 
 					// Make the editor appear
 					$("#witsec-code-editor").height("100%");
@@ -152,7 +155,7 @@
 						}
 
 						// Grab the HTML and save both HTML and CSS to curr
-						curr._customHTML = editorHTML.getValue();
+						curr._customHTML = EncodePHP(editorHTML.getValue());
 						curr._styles = styles;
 
 						// Save
@@ -177,6 +180,26 @@
 					$("#witsec-code-editor").height("0");
 					curr = null;
 				});
+
+				// Do things on preview/publish
+				a.addFilter("publishHTML", function(b) {
+					b = DecodePHP(b);
+					return b
+				});
+
+				// "Encode" PHP - if we don't obfuscate PHP code, Mobirise tends to rem it out
+				EncodePHP = function(php) {
+					php = php.replace("<?", "<!--[PHP]<?");
+					php = php.replace("?>", "?>[/PHP]-->");
+					return php;
+				}
+
+				// "Decode" PHP
+				DecodePHP = function(php) {
+					php = php.replace("<!--[PHP]<?", "<?");
+					php = php.replace("?>[/PHP]-->", "?>");
+					return php;
+				}
             }
         }
     })
