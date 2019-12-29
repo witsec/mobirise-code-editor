@@ -1,0 +1,27 @@
+<section class="mbr-section mbr-section--no-padding" data-bg-video="{{bg.type == 'video' && bg.value.url}}" mbr-class="{'mbr-fullscreen': fullScreen, 'mbr-parallax-background': bg.parallax}">
+
+<mbr-parameters>
+    <!-- Block parameters controls (Blue "Gear" panel) -->
+    <input type="checkbox" title="Full Screen" name="fullScreen">
+    <input type="range" inline title="Top" name="paddingTop" min="0" max="9" step="1" value="6" condition="fullScreen == false">
+    <input type="range" inline title="Bottom" name="paddingBottom" min="0" max="9" step="1" value="6" condition="fullScreen == false">
+
+    <fieldset type="background" name="bg" parallax>
+    <input type="image" title="Background Image" value="../_images/background.jpg" parallax>
+    <input type="color" title="Background Color" value="#efefef" selected>
+    <input type="video" title="Background Video" value="https://www.youtube.com/watch?v=36YgDDJ7XSc">
+    </fieldset>
+    <input type="checkbox" title="Overlay" name="overlay" condition="bg.type !== 'color'" checked>
+    <input type="color" title="Overlay Color" name="overlayColor" value="#232323" condition="overlay && bg.type !== 'color'">
+    <input type="range" inline title="Opacity" name="overlayOpacity" min="0" max="1" step="0.1" value="0.6" condition="overlay && bg.type !== 'color'">
+    <!-- End block parameters -->
+</mbr-parameters>
+
+<div class="mbr-overlay" mbr-if="overlay && bg.type!== 'color'" mbr-style="{'opacity': overlayOpacity, 'background-color': overlayColor}">
+</div>
+
+<div class="container" style="text-align:center">
+	<img src="../_images/edit.jpg" title="Use a Code Editor to edit the HTML and CSS of this block">
+</div>
+
+</section>

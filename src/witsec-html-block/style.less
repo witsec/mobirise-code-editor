@@ -1,0 +1,12 @@
+& when not (@fullScreen) {
+  padding-top: (@paddingTop * 15px);
+  padding-bottom: (@paddingBottom * 15px);
+}
+
+& when (@bg-type = 'color') {
+  background-color: @bg-value;
+}
+
+& when (@bg-type = 'image') {
+  background-image: url(@bg-value);
+}

@@ -6,7 +6,7 @@
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #2b303d;
+  background-color: #20232d;
   overflow-y: hidden;
   transition: 0.4s;
   z-index: 1201;  /* Needs to be above the "add block" and below the "alertDlg" zindex */

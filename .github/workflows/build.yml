@@ -1,0 +1,39 @@
+on:
+  push:
+    tags:
+    - 'v*'
+
+name: Build Mobirise Extension
+
+jobs:
+  build:
+    name: Create Downloadable Mobirise Extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@master
+      - name: Create Mobirise Extension File
+        run: |
+          cd src/
+          zip -r ../witsec-code-editor.mbrext .
+          cd ../
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./witsec-code-editor.mbrext
+          asset_name: witsec-code-editor.mbrext
+          asset_content_type: application/zip

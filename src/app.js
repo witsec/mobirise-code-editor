@@ -29,11 +29,27 @@
 
 				// Do stuff to load all required js files (doing it this way somehow ensures all files are loaded properly, while using params.json often messes things up...)
 				var dir = mbrApp.getAddonDir("witsec-code-editor");
-				var scrarr = ["codemirror-5.44.0.min.js", "jshint-2.10.2.min.js", "lint-javascript-lint-5.44.0.min.js", "lint-lint-5.44.0.min.js", "addon-active-line-5.44.0.min.js", "mode-clike-5.44.0.min.js", "mode-css-5.44.0.min.js", "mode-htmlmixed-5.44.0.min.js", "mode-javascript-5.44.0.min.js", "mode-php-5.44.0.min.js", "mode-xml-5.44.0.min.js"];
+				var scrarr = [
+					"codemirror-5.44.0.min.js",
+					"jshint-2.10.2.min.js",
+					"lint-javascript-lint-5.44.0.min.js",
+					"lint-lint-5.44.0.min.js",
+					"addon-active-line-5.44.0.min.js",
+					"mode-clike-5.44.0.min.js",
+					"mode-css-5.44.0.min.js",
+					"mode-htmlmixed-5.44.0.min.js",
+					"mode-javascript-5.44.0.min.js",
+					"mode-php-5.44.0.min.js",
+					"mode-xml-5.44.0.min.js",
+					"addon-search-5.44.0.min.js",
+					"addon-searchcursor-5.44.0.min.js",
+					"addon-jump-to-line-5.44.0.min.js",
+					"addon-dialog-5.44.0.min.js",
+				];
 
 				var scrhtml = "";
 				scrarr.forEach(s => {
-					scrhtml += '<script src="' + dir + '/lib/' + s + '"></script>\n';
+					scrhtml += '<script type="text/javascript" src="' + dir + '/lib/' + s + '"></script>\n';
 				});
 
 				// Create the skeleton for the overlay and edit fields
@@ -48,7 +64,7 @@
 						'        <textarea id="witsec-code-editor-html"></textarea>',
 						'      </div>',
 						'      <div class="col-lg-4 witsec-code-editor-col">',
-						'        <div class="witsec-code-editor-header"><h4>CSS (JSON format)</h4></div>',
+						'        <div class="witsec-code-editor-header"><h4>CSS/LESS</h4></div>',
 						'        <textarea id="witsec-code-editor-css"></textarea>',
 						'      <div>',
 						'    </div>',
@@ -66,7 +82,8 @@
 						mode: "application/x-httpd-php",
 						theme: "solarized dark",
 						lint: true,
-						gutters: ["CodeMirror-lint-markers"]
+						gutters: ["CodeMirror-lint-markers"],
+						extraKeys: {"Ctrl-F": "findPersistent", "Ctrl-H": "replace"}
 					});
 
 					// Initialize CodeMirror for the CSS Editor
@@ -74,10 +91,12 @@
 						styleActiveLine: true,
 						lineNumbers: true,
 						lineWrapping: false,
-						mode: "application/json",
+						matchBrackets: true,
+						mode: "text/x-less",
 						theme: "solarized dark",
 						lint: true,
-						gutters: ["CodeMirror-lint-markers"]
+						gutters: ["CodeMirror-lint-markers"],
+						extraKeys: {"Ctrl-F": "findPersistent", "Ctrl-H": "replace"}
 					});
 				}
 
@@ -112,9 +131,12 @@
 						return false;
 					}
 
+					// Get the PHP back again
+					curr._customHTML = DecodePHP(curr._customHTML, curr);
+
 					// Fill HTML and CSS here...
-					editorHTML.setValue(DecodePHP(curr._customHTML));
-					editorCSS.setValue(JSON.stringify(curr._styles, undefined, 2));
+					editorHTML.setValue(curr._customHTML);
+					editorCSS.setValue(json2css(curr._styles));
 
 					// Clear history, so ctrl-z doesn't empty the editors
 					editorHTML.clearHistory();
@@ -145,18 +167,27 @@
 				// Save everything
 				a.$body.on("click", ".witsec-code-editor-save", function(b) {
 					try {
-						// Check if the CSS (JSON) contains any errors
-						try {
-							var styles = JSON.parse(editorCSS.getValue());
-						}
-						catch(e) {
-							mbrApp.alertDlg("The CSS doesn't appear to be in proper JSON format.");
+						var styles = {};
+						var css2json = false;
+
+						// Try to turn the CSS into JSON
+						mbrApp.objectifyCSS(editorCSS.getValue()).then(function(a) {
+							css2json = true;
+							return styles = a;
+							}, function(a) {
+								mbrApp.alertDlg("The CSS/LESS contains syntax errors.");
+						});
+
+						// Check if the CSS was succesfully converted to JSON
+						if (!css2json)
 							return false;
-						}
 
 						// Grab the HTML and save both HTML and CSS to curr
-						curr._customHTML = EncodePHP(editorHTML.getValue());
+						curr._customHTML = editorHTML.getValue();
 						curr._styles = styles;
+
+						// Encode PHP
+						curr._customHTML = EncodePHP(curr._customHTML, curr);
 
 						// Save
 						var currentPage = mbrApp.Core.currentPage;
@@ -181,24 +212,37 @@
 					curr = null;
 				});
 
-				// Do things on preview/publish
-				a.addFilter("publishHTML", function(b) {
-					b = DecodePHP(b);
-					return b
+				// Put PHP and JavaScript back in the HTML
+				a.Core.addFilter("getResultHTMLcomponent", function(b, block) {
+					// But only if the block has customHTML
+					if (block._customHTML)
+						b = DecodePHP(b, block);
+
+					return b;
 				});
 
-				// "Encode" PHP - if we don't obfuscate PHP code, Mobirise tends to rem it out
-				EncodePHP = function(php) {
-					php = php.replace(/<\?/g, "<!--[PHP-CE]<?");
-					php = php.replace(/\?>/g, "?>[/PHP-CE]-->");
-					return php;
+				// Function to encode PHP
+				function EncodePHP(html, block) {
+					block._PHPplaceholders = [];
+
+					html = html.replace(/<\?[\w\W]+?\?>/g, function(code) {
+						var len = block._PHPplaceholders.length;
+						block._PHPplaceholders.push(code);
+						return "[PHP_CODE_" + len + "]";
+					});
+
+					return html;
 				}
 
-				// "Decode" PHP
-				DecodePHP = function(php) {
-					php = php.replace(/<!--\[PHP-CE\]<\?/g, "<?");
-					php = php.replace(/\?>\[\/PHP-CE\]-->/g, "?>");
-					return php;
+				// Function to decode PHP
+				function DecodePHP(html, block) {
+					if (block._PHPplaceholders && block._PHPplaceholders.length) {
+						for (i=0; i<block._PHPplaceholders.length; i++) {
+							html = html.replace("[PHP_CODE_" + i + "]", block._PHPplaceholders[i]);
+						}
+					}
+
+					return html;
 				}
             }
         }

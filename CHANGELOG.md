@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2 (2019-12-29)
+
+- Added new block for custom HTML that can be edited with the editor
+- Added search and replace functionality
+- Added JSON to CSS translator, so you can simply edit (or paste) CSS instead of JSON
+- Added GitHub Actions CI pipeline to automatically generate mbrext files
+- Removed the "fix" for PHP code getting distorted, as it was no issue with this extension. The fix also wasn't working properly anyway
+- Added better support for PHP code
+
 ## 0.4 (2019-04-04)
 
 - Added PHP support, meaning Mobirise will no longer comment out PHP code, but just leave it be. Happy coding!
