@@ -1,7 +1,8 @@
-(function(jQuery, mbrApp) {
+defineM("witsec-code-editor", function(g, mbrApp, tr) {
 
 	var curr = null;
-	var editorHTML, editorCSS, compIndex;
+	var compIndex, ifrHTML, ifrCSS;
+
     mbrApp.regExtension({
         name: "witsec-code-editor",
         events: {
@@ -11,7 +12,7 @@
 					var h = jQuery(a);
 
 					// Add edit button to component buttons
-					var btn = '<span class="mbr-btn mbr-btn-default mbr-icon-code witsec-code-editor-editbutton" data-tooltipster="bottom" title="Edit Code"></span><style>.witsec-code-editor-editbutton:hover { background-color: #42a5f5 !important; }</style>';
+					var btn = '<span class="mbr-btn mbr-btn-default mbr-icon-code witsec-code-editor-editbutton" data-tooltipster="bottom" title="Edit Block"></span><style>.witsec-code-editor-editbutton:hover { background-color: #42a5f5 !important; color: #fff !important }</style>';
 					if (h.find(".component-params").length)
 						h.find(".component-params").before(btn);
 					else if (h.find(".component-remove").length)
@@ -26,82 +27,51 @@
 
             load: function() {
 				var a = this;
+				var monacoHtml = mbrApp.getAddonDir("witsec-code-editor") + "/monaco/editor.html";
 
-				// Do stuff to load all required js files (doing it this way somehow ensures all files are loaded properly, while using params.json often messes things up...)
-				var dir = mbrApp.getAddonDir("witsec-code-editor");
-				var scrarr = [
-					"codemirror-5.44.0.min.js",
-					"jshint-2.10.2.min.js",
-					"lint-javascript-lint-5.44.0.min.js",
-					"lint-lint-5.44.0.min.js",
-					"addon-active-line-5.44.0.min.js",
-					"mode-clike-5.44.0.min.js",
-					"mode-css-5.44.0.min.js",
-					"mode-htmlmixed-5.44.0.min.js",
-					"mode-javascript-5.44.0.min.js",
-					"mode-php-5.44.0.min.js",
-					"mode-xml-5.44.0.min.js",
-					"addon-search-5.44.0.min.js",
-					"addon-searchcursor-5.44.0.min.js",
-					"addon-jump-to-line-5.44.0.min.js",
-					"addon-dialog-5.44.0.min.js",
-				];
-
-				var scrhtml = "";
-				scrarr.forEach(s => {
-					scrhtml += '<script type="text/javascript" src="' + dir + '/lib/' + s + '"></script>\n';
-				});
+				// Check app settings for Code Editor settings - if they don't exist, set to a default value
+				mbrApp.appSettings["witsec-code-editor-wrap"]  = mbrApp.appSettings["witsec-code-editor-wrap"]  || "off";
+				mbrApp.appSettings["witsec-code-editor-theme"] = mbrApp.appSettings["witsec-code-editor-theme"] || "vs-dark";
 
 				// Create the skeleton for the overlay and edit fields
 				if (!$("#witsec-code-editor").length) {
 					a.$body.append([
 						'<div id="witsec-code-editor">',
-						scrhtml,
-						'  <div>',
-						'    <div class="row witsec-code-editor-row">',
-						'      <div class="col-lg-8 witsec-code-editor-col">',
-						'        <div class="witsec-code-editor-header"><h4>HTML</h4></div>',
-						'        <textarea id="witsec-code-editor-html"></textarea>',
-						'      </div>',
-						'      <div class="col-lg-4 witsec-code-editor-col">',
-						'        <div class="witsec-code-editor-header"><h4>CSS/LESS</h4></div>',
-						'        <textarea id="witsec-code-editor-css"></textarea>',
-						'      <div>',
-						'    </div>',
+						'  <div class="witsec-code-editor-col-html">',
+						'    <div class="witsec-code-editor-header"><h4>HTML</h4></div>',
+						'    <iframe id="witsec-code-editor-iframe-html" class="witsec-code-editor-iframe" src="' + monacoHtml + '" scrolling="no"></iframe>',
 						'  </div>',
-						'  <button class="witsec-code-editor-save btn btn-fab btn-raised btn-primary" data-tooltipster="top" title="Save"><i class="mbr-icon-success"></i></button>',
-						'  <button class="witsec-code-editor-cancel btn btn-fab btn-raised btn-material-red" data-tooltipster="top" title="Cancel"><i class="mbr-icon-close"></i></button>',
+						'  <div class="witsec-code-editor-divider"></div>',
+						'  <div class="witsec-code-editor-col-css">',
+						'    <div class="witsec-code-editor-header">',
+						'      <h4 style="float:left; width:50%">CSS/LESS</h4>',
+						'      <h4 style="float:left; width:50%; text-align:right">',
+						'        <i class="mbr-icon-align-left witsec-code-editor-wrapbutton"  data-tooltipster="bottom" title="Toggle Wrap"></i>&nbsp;&nbsp;&nbsp;',
+						'        <i class="mbr-icon-sun        witsec-code-editor-themebutton" data-tooltipster="bottom" title="Toggle Theme"></i>',
+						'      </h4>',
+						'    </div>',
+						'    <iframe id="witsec-code-editor-iframe-css" class="witsec-code-editor-iframe" src="' + monacoHtml + '" scrolling="no"></iframe>',
+						'  </div>',
+						'  <button class="witsec-code-editor-save btn btn-fab btn-raised btn-primary" data-tooltipster="top" title="Save">',
+						'    <svg height="30" viewBox="0 0 30 30" width="30" xmlns="http://www.w3.org/2000/svg"><path d="M.5 14a.5.5 0 0 0-.348.858l9.988 9.988a.5.5 0 1 0 .706-.706L.858 14.152A.5.5 0 0 0 .498 14zm28.99-9c-.13.004-.254.057-.345.15L12.163 22.13c-.49.47.236 1.197.707.707l16.982-16.98c.324-.318.077-.857-.363-.857z"/></svg>',
+						'  </button>',
+						'  <button class="witsec-code-editor-cancel btn btn-fab btn-raised btn-material-red" data-tooltipster="top" title="Cancel">',
+						'    <svg height="30" viewBox="0 0 30 30" width="30" xmlns="http://www.w3.org/2000/svg"><path d="M29.484 0c-.13.004-.252.057-.343.15L17.164 12.13c-.49.47.235 1.197.706.707L29.846.857c.325-.318.1-.857-.363-.857zM12.488 17c-.13.004-.25.058-.34.15L.162 29.14c-.486.467.233 1.186.7.7L12.848 17.85c.325-.313.093-.85-.36-.85zM.5 0a.5.5 0 0 0-.348.86L29.14 29.845a.5.5 0 1 0 .706-.706L.86.152A.5.5 0 0 0 .5 0z"/></svg>',
+						'  </button>',
 						'<div>'
 					].join("\n"));
 
-					// Initialize CodeMirror for the HTML Editor
-					editorHTML = CodeMirror.fromTextArea(a.$body.find("#witsec-code-editor-html")[0], {
-						styleActiveLine: true,
-						lineNumbers: true,
-						lineWrapping: false,
-						mode: "application/x-httpd-php",
-						theme: "solarized dark",
-						lint: true,
-						gutters: ["CodeMirror-lint-markers"],
-						extraKeys: {"Ctrl-F": "findPersistent", "Ctrl-H": "replace"}
-					});
+					// Set editor columns to max height available
+					a.$body.find(".witsec-code-editor-iframe").css("height", window.innerHeight - 40);	// 40 is the height of the header
 
-					// Initialize CodeMirror for the CSS Editor
-					editorCSS = CodeMirror.fromTextArea(a.$body.find("#witsec-code-editor-css")[0], {
-						styleActiveLine: true,
-						lineNumbers: true,
-						lineWrapping: false,
-						matchBrackets: true,
-						mode: "text/x-less",
-						theme: "solarized dark",
-						lint: true,
-						gutters: ["CodeMirror-lint-markers"],
-						extraKeys: {"Ctrl-F": "findPersistent", "Ctrl-H": "replace"}
-					});
+					// Set references for quick access
+					ifrHTML = document.getElementById("witsec-code-editor-iframe-html").contentWindow;
+					ifrCSS = document.getElementById("witsec-code-editor-iframe-css").contentWindow;
 				}
 
 				// Click handler for "edit code" icon
 				a.$template.on("click", ".witsec-code-editor-editbutton", function(e) {
+
 					// Re-create component index (this is an internal list only which refers to the actual index, so we don't have to fiddle with that)
 					compIndex = [];
 					for (index in mbrApp.Core.resultJSON[mbrApp.Core.currentPage].components){
@@ -131,23 +101,25 @@
 						return false;
 					}
 
-					// Get the PHP back again
+					// Get the JS and PHP back again
+					curr._customHTML = DecodeJS(curr._customHTML, curr);
 					curr._customHTML = DecodePHP(curr._customHTML, curr);
 
-					// Fill HTML and CSS here...
-					editorHTML.setValue(curr._customHTML);
-					editorCSS.setValue(json2css(curr._styles));
+					// If the CSS editor isn't yet set to LESS, do so now (by default it loads with PHP)
+					if (ifrCSS.editor._configuration._rawOptions.language != "less")
+						ifrCSS.monaco.editor.setModelLanguage(ifrCSS.monaco.editor.getModels()[0], "less");
 
-					// Clear history, so ctrl-z doesn't empty the editors
-					editorHTML.clearHistory();
-					editorCSS.clearHistory();
+					// Make sure the theme and word wrap are set correctly
+					ToggleTheme(false);
+					ToggleWordWrap(false);
 
-					// Set editor columns to max height available
-					a.$body.find(".witsec-code-editor-col").height(window.innerHeight - 40);	// 40 is the height of the header
+					// Empty the editors (this will put the cursor back on line 1)
+					ifrHTML.editor.setValue("");
+					ifrCSS.editor.setValue("");
 
-					// Set editors to fill 100% of the div they're in
-					editorHTML.setSize("100%", "100%");
-					editorCSS.setSize("100%", "100%");
+					// Put the HTML and CSS in the editor windows
+					ifrHTML.editor.setValue( curr._customHTML.replace(/<\/script/img, "<\/script") );	// Escape closing script tag to prevent bad things from happening
+					ifrCSS.editor.setValue(json2css(curr._styles));
 
 					// In case the component params are visible, hide them
 					mbrApp.hideComponentParams();
@@ -160,7 +132,7 @@
 				$(window).resize(function() {
 					// If the Code Editor is visible, set editor columns to max height available
 					if (a.$body.find("#witsec-code-editor").height() != "0") {
-						a.$body.find(".witsec-code-editor-col").height(window.innerHeight - 40);	// 40 is the height of the header
+						a.$body.find(".witsec-code-editor-iframe").height(window.innerHeight - 40);	// 40 is the height of the header
 					}
 				});
 
@@ -171,7 +143,7 @@
 						var css2json = false;
 
 						// Try to turn the CSS into JSON
-						mbrApp.objectifyCSS(editorCSS.getValue()).then(function(a) {
+						mbrApp.objectifyCSS( ifrCSS.editor.getValue() ).then(function(a) {
 							css2json = true;
 							return styles = a;
 							}, function(a) {
@@ -183,11 +155,12 @@
 							return false;
 
 						// Grab the HTML and save both HTML and CSS to curr
-						curr._customHTML = editorHTML.getValue();
+						curr._customHTML = ifrHTML.editor.getValue();
 						curr._styles = styles;
 
-						// Encode PHP
+						// Encode PHP and JS
 						curr._customHTML = EncodePHP(curr._customHTML, curr);
+						curr._customHTML = EncodeJS(curr._customHTML, curr);
 
 						// Save
 						var currentPage = mbrApp.Core.currentPage;
@@ -212,12 +185,23 @@
 					curr = null;
 				});
 
+				// Toggle word wrap
+				a.$body.on("click", ".witsec-code-editor-wrapbutton", function(e) {
+					ToggleWordWrap(true);
+				});
+
+				// Toggle theme
+				a.$body.on("click", ".witsec-code-editor-themebutton", function(e) {
+					ToggleTheme(true);
+				});
+
 				// Put PHP and JavaScript back in the HTML
 				a.Core.addFilter("getResultHTMLcomponent", function(b, block) {
 					// But only if the block has customHTML
-					if (block._customHTML)
+					if (block._customHTML) {
+						b = DecodeJS(b, block);
 						b = DecodePHP(b, block);
-
+					}
 					return b;
 				});
 
@@ -244,7 +228,65 @@
 
 					return html;
 				}
+
+				// Function to encode Javascript
+				function EncodeJS(html, block) {
+					block._JSplaceholders = [];
+
+					html = html.replace(/<script[\w\W]+?<\/script>/g, function(code) {
+						var len = block._JSplaceholders.length;
+						block._JSplaceholders.push(code);
+						return "[JS_CODE_" + len + "]";
+					});
+
+					return html;
+				}
+
+				// Function to decode Javascript
+				function DecodeJS(html, block) {
+					if (block._JSplaceholders && block._JSplaceholders.length) {
+						for (i=0; i<block._JSplaceholders.length; i++) {
+							html = html.replace("[JS_CODE_" + i + "]", block._JSplaceholders[i]);
+						}
+					}
+
+					return html;
+				}
+
+				// Function to toggle word wrap
+				function ToggleWordWrap(set) {
+					var w = mbrApp.appSettings["witsec-code-editor-wrap"];
+
+					if (set)
+						w = ( w == "off" ? "on" : "off" );
+
+					ifrHTML.editor.updateOptions({ wordWrap: w });
+					ifrCSS.editor.updateOptions({ wordWrap:  w });
+
+					mbrApp.appSettings["witsec-code-editor-wrap"] = w;
+				}
+
+				// Function to toggle theme
+				function ToggleTheme(set) {
+					var t = mbrApp.appSettings["witsec-code-editor-theme"];
+
+					if (set) {
+						switch (t) {
+							case "vs-dark":	t = "vs";
+											break;
+							case "vs":		t = "hc-black";
+											break;
+							default:		t = "vs-dark";
+						}
+					}
+
+					ifrHTML.monaco.editor.setTheme(t);
+					ifrCSS.monaco.editor.setTheme(t);
+
+					mbrApp.appSettings["witsec-code-editor-theme"] = t;
+				}
+
             }
         }
     })
-})(jQuery, mbrApp);
+}, ["jQuery", "mbrApp", "TR()"]);

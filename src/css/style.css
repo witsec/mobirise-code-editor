@@ -1,4 +1,6 @@
 #witsec-code-editor {
+  display: flex;
+	overflow: hidden;
   height: 0%;
   width: 100%;
   color: #fff;
@@ -7,9 +9,10 @@
   top: 0;
   left: 0;
   background-color: #20232d;
-  overflow-y: hidden;
   transition: 0.4s;
   z-index: 1201;  /* Needs to be above the "add block" and below the "alertDlg" zindex */
+  padding: 0px;
+  margin: 0px;
 }
 
 .witsec-code-editor-header {
@@ -17,18 +20,40 @@
   padding: 2px 10px 2px 10px;
   margin: 0px;
   background-color: #34424e;
+  overflow: hidden;
 }
 
-.witsec-code-editor-row,
-.witsec-code-editor-col {
+.witsec-code-editor-col-html {
   padding: 0px;
   margin: 0px;
+  flex: 70%;
+}
+
+.witsec-code-editor-col-css {
+  padding: 0px;
+  margin: 0px;
+  flex: 30%;
+}
+
+.witsec-code-editor-divider {
+  width: 1px;
+  background-color: #34424e;
+}
+
+.witsec-code-editor-iframe {
+  flex-grow: 1;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
 .witsec-code-editor-save {
   position: absolute;
   right: 24px;
   bottom: 24px;
+  background-color: #009688 !important;
+  fill: #fff;
   z-index: 5000; /* High zindex, otherwise you can't click them */
 }
 
@@ -36,10 +61,7 @@
   position: absolute;
   right: 90px;
   bottom: 24px;
+  background-color: #f44336 !important;
+  fill: #fff;
   z-index: 5000; /* High zindex, otherwise you can't click them */
-}
-
-/* From lint-[version].min.css */
-.CodeMirror-lint-tooltip {
-  z-index:5000 !important; /* High zindex, otherwise the tooltips are behind the editor */
 }

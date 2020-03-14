@@ -1,7 +1,7 @@
 {
-    "name": "Code Editor v2",
+    "name": "Code Editor v3",
     "alias": "witsec-code-editor",
-    "version": 2,
+    "version": 3,
     "minAppVersion": "4.7.7",
     "appScript": true,
     "components" : [
@@ -11,15 +11,10 @@
             "_isSecondary": true
         }
     ],
-	"dependencies": [
+    "dependencies": [
         "static/code-editor.js",
-        "css/style.css",
-        "css/codemirror-5.44.0.min.css",
-        "css/codemirror-addon-dialog-5.44.0.min.css",
-        "css/solarized-dark-5.44.0.css",
-        "css/lint-5.44.0.min.css"
+        "css/style.css"
     ],
-	"coreScript" : false,
-	"description":"Edit the HTML and CSS of any M4 or AMP block you like. <a href='https://witsec.nl'>Learn more...</a>",
-	"logo":"thumbnail.png"
+    "description":"Edit the HTML and CSS of any M4 or AMP block you like. <a href='https://witsec.nl'>Learn more...</a>",
+	"logo":"thumbnail.svg"
 }

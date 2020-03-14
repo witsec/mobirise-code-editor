@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3 (2020-03-14)
+
+- Fixed compatibility with Mobirise v5
+- Replaced CodeMirror with Monaco Editor, including three themes (Visual Studio, Visual Studio Dark and High Contrast Black)
+- Added button to toggle word wrap
+- Added better support for Javascript code; it gets replaced with [JS_CODE_x], so it isn't active inside Mobirise
+
 ## v2 (2019-12-29)
 
 - Added new block for custom HTML that can be edited with the editor
