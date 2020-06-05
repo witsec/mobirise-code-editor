@@ -1,4 +1,4 @@
-defineM("witsec-code-editor", function(g, mbrApp, tr) {
+defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 
 	var curr = null;
 	var compIndex, ifrHTML, ifrCSS;
@@ -8,6 +8,10 @@ defineM("witsec-code-editor", function(g, mbrApp, tr) {
         events: {
             beforeAppLoad: function() {
                 mbrApp.Core.addFilter("prepareComponent", function(a, b) {
+					// Check if current theme is an old M/M3 theme (as the Code Editor isn't available there)
+					if (mbrApp.theme.type === "primary")
+						return a;
+
 					// 'a' is the component window's HTML as string. We need to jQuery that, so we can do magic stuff with it
 					var h = jQuery(a);
 
@@ -26,6 +30,11 @@ defineM("witsec-code-editor", function(g, mbrApp, tr) {
 			},
 
             load: function() {
+
+				// Check if current theme is an old M/M3 theme (as the Code Editor isn't available there)
+				if (mbrApp.theme.type === "primary")
+					return false;
+
 				var a = this;
 				var monacoHtml = mbrApp.getAddonDir("witsec-code-editor") + "/monaco/editor.html";
 
@@ -91,13 +100,13 @@ defineM("witsec-code-editor", function(g, mbrApp, tr) {
 
 					// If curr is null, something is wrong
 					if (curr === null) {
-						mbrApp.alertDlg("An error occured while opening the Code Editor.");
+						mbrApp.alertDlg("An error occured while opening the witsec Code Editor.");
 						return false;
 					}
 
 					// If no _customHTML exists, it's probably a "component.js" kinda block, which doesn't have editable HTML
 					if (!curr._customHTML) {
-						mbrApp.alertDlg("Sorry, this block can't be edited with the Code Editor.");
+						mbrApp.alertDlg("Sorry, this block can't be edited with the witsec Code Editor.");
 						return false;
 					}
 
@@ -136,47 +145,46 @@ defineM("witsec-code-editor", function(g, mbrApp, tr) {
 					}
 				});
 
-				// Save everything
+				// Save
 				a.$body.on("click", ".witsec-code-editor-save", function(b) {
 					try {
-						var styles = {};
-						var css2json = false;
-
 						// Try to turn the CSS into JSON
-						mbrApp.objectifyCSS( ifrCSS.editor.getValue() ).then(function(a) {
-							css2json = true;
-							return styles = a;
-							}, function(a) {
+						mbrApp.objectifyCSS( ifrCSS.editor.getValue() ).then(
+							// On success, save the block
+							function(styles) {
+								// Grab the HTML and save both HTML and CSS to curr
+								curr._customHTML = ifrHTML.editor.getValue();
+								curr._styles = styles;
+
+								// Encode PHP and JS
+								curr._customHTML = EncodePHP(curr._customHTML, curr);
+								curr._customHTML = EncodeJS(curr._customHTML, curr);
+
+								// Save
+								var currentPage = mbrApp.Core.currentPage;
+								mbrApp.runSaveProject(function() {
+									mbrApp.loadRecentProject(function(){
+										$("a[data-page='" + currentPage + "']").trigger("click")
+									});
+								});
+
+								// Make the editor disappear
+								$("#witsec-code-editor").height("0");
+								curr = null;
+
+								return true;
+							},
+
+							// On error
+							function(a) {
 								mbrApp.alertDlg("The CSS/LESS contains syntax errors.");
-						});
-
-						// Check if the CSS was succesfully converted to JSON
-						if (!css2json)
-							return false;
-
-						// Grab the HTML and save both HTML and CSS to curr
-						curr._customHTML = ifrHTML.editor.getValue();
-						curr._styles = styles;
-
-						// Encode PHP and JS
-						curr._customHTML = EncodePHP(curr._customHTML, curr);
-						curr._customHTML = EncodeJS(curr._customHTML, curr);
-
-						// Save
-						var currentPage = mbrApp.Core.currentPage;
-						mbrApp.runSaveProject(function() {
-							mbrApp.loadRecentProject(function(){
-								$("a[data-page='" + currentPage + "']").trigger("click")
-							});
-						});
+								return false;
+							}
+						);
 					}
 					catch(err){
 						mbrApp.alertDlg(err.name + ': ' + err.message);
 					}
-
-					// Make the editor disappear
-					$("#witsec-code-editor").height("0");
-					curr = null;
 				});
 
 				// Do nothing and hide the editor
@@ -205,6 +213,17 @@ defineM("witsec-code-editor", function(g, mbrApp, tr) {
 					return b;
 				});
 
+				// Extra checks to see if PHP got crippled by Mobirise
+                a.addFilter("publishHTML", function(b) {
+					if ( /<!--\?/gmi.test(b) && /\?-->/gmi.test(b) ) {
+						// Try to capture the page title and output a notification
+						var title = b.match(/<title>(.+)<\/title>/i);
+						mbrApp.alertDlg("<h4>witsec Code Editor</h4>A PHP conversion error was detected in one of the pages (" + (title[1] ? title[1] : "unknown") + "). Try to re-publish your website. If the problem persists, please notify <a href=\"javascript:mbrApp.openUrl('https://witsec.nl');\" title=\"Go to witsec.nl\">witsec</a>.");
+					}
+
+					return b
+				});
+
 				// Function to encode PHP
 				function EncodePHP(html, block) {
 					block._PHPplaceholders = [];
@@ -223,6 +242,10 @@ defineM("witsec-code-editor", function(g, mbrApp, tr) {
 					if (block._PHPplaceholders && block._PHPplaceholders.length) {
 						for (i=0; i<block._PHPplaceholders.length; i++) {
 							html = html.replace("[PHP_CODE_" + i + "]", block._PHPplaceholders[i]);
+							html = html.replace("[php_code_" + i + "]", block._PHPplaceholders[i]);
+
+							// Remove the ="" after PHP closing tags, if the PHP is inside an HTML tag
+							html = html.replace(/\?>=""/ig, "?>").replace(/\?>=''/ig, "?>");
 						}
 					}
 
@@ -247,6 +270,7 @@ defineM("witsec-code-editor", function(g, mbrApp, tr) {
 					if (block._JSplaceholders && block._JSplaceholders.length) {
 						for (i=0; i<block._JSplaceholders.length; i++) {
 							html = html.replace("[JS_CODE_" + i + "]", block._JSplaceholders[i]);
+							html = html.replace("[js_code_" + i + "]", block._JSplaceholders[i]);
 						}
 					}
 

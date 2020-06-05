@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v4 (2020-06-06)
+
+- Added check if current theme is a 'primary' theme (M/M3), in which case the Code Editor is not available
+- Improved handling of asynchronous 'objectifyCSS' function. Its behaviour changed in v5.0.7, but this should've been handled better already anyway
+- Improved PHP when used as attributes inside HTML elements
+- Added notification if a PHP conversion error was detected. This error sometimes happens, but haven't found a way to reproduce it yet
+
 ## v3 (2020-03-14)
 
 - Fixed compatibility with Mobirise v5
