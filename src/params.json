@@ -1,12 +1,12 @@
 {
-    "name": "Code Editor v4",
+    "name": "Code Editor v5",
     "alias": "witsec-code-editor",
-    "version": 4,
+    "version": 5,
     "minAppVersion": "4.7.7",
     "appScript": true,
     "components" : [
 		{
-            "path":"/witsec-html-block",
+            "path":"components/witsec-html-block",
             "_group":"witsec",
             "_isSecondary": true
         }
@@ -15,6 +15,6 @@
         "static/code-editor.js",
         "css/style.css"
     ],
-    "description":"Edit the HTML and CSS of any M4 or AMP block you like. <a href='https://witsec.nl'>Learn more...</a>",
+    "description":"Edit the HTML and CSS of any M4, M5 or AMP block you like. <a href='https://witsec.nl'>Learn more...</a>",
 	"logo":"thumbnail.svg"
 }

@@ -2,10 +2,12 @@
 
 <mbr-parameters>
     <!-- Block parameters controls (Blue "Gear" panel) -->
+    <header>Size</header>
     <input type="checkbox" title="Full Screen" name="fullScreen">
     <input type="range" inline title="Top" name="paddingTop" min="0" max="9" step="1" value="6" condition="fullScreen == false">
     <input type="range" inline title="Bottom" name="paddingBottom" min="0" max="9" step="1" value="6" condition="fullScreen == false">
 
+    <header>Background</header>
     <fieldset type="background" name="bg" parallax>
     <input type="image" title="Background Image" value="../_images/background.jpg" parallax>
     <input type="color" title="Background Color" value="#efefef" selected>
@@ -20,8 +22,10 @@
 <div class="mbr-overlay" mbr-if="overlay && bg.type!== 'color'" mbr-style="{'opacity': overlayOpacity, 'background-color': overlayColor}">
 </div>
 
+<!-- Place your own code below -->
 <div class="container" style="text-align:center">
 	<img src="../_images/edit.jpg" title="Use a Code Editor to edit the HTML and CSS of this block">
 </div>
+<!-- Place your own code above -->
 
 </section>

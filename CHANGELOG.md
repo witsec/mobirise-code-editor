@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v5 (2020-10-03)
+
+- Fixed issue where you couldn't properly edit/select a footer if it had the 'always-bottom' attribute
+- Added feature to make blocks global (by adding the 'global' attribute to the section), block then gets added to all pages
+- Can now also edit blocks that are global, changes get pushed to all other instances of a block
+
 ## v4 (2020-06-06)
 
 - Added check if current theme is a 'primary' theme (M/M3), in which case the Code Editor is not available

@@ -83,13 +83,23 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 
 					// Re-create component index (this is an internal list only which refers to the actual index, so we don't have to fiddle with that)
 					compIndex = [];
+					var footerIndex = false;
 					for (index in mbrApp.Core.resultJSON[mbrApp.Core.currentPage].components){
 						var comp = mbrApp.Core.resultJSON[mbrApp.Core.currentPage].components[index];
-						if (comp._once == "menu")
+
+						// We have to check if there's a footer with the 'always-bottom' attribute
+						var attr = $(comp._customHTML).attr("always-bottom");
+						if (comp._once == "footers" && typeof attr !== typeof undefined && attr !== false)	// Footer with always-bottom
+							footerIndex = index;
+						else if (comp._once == "menu")														// Menu
 							compIndex.unshift(index);
 						else
-							compIndex.push(index);
+							compIndex.push(index);															// Any other block
 					}
+
+					// If there was a footer with the 'always-bottom' attribute, add it last
+					if (footerIndex)
+						compIndex.push(footerIndex);
 
 					// Find the index of the clicked icon
 					a.$template.find('.witsec-code-editor-editbutton').each(function(index, obj) {
@@ -159,6 +169,35 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 								// Encode PHP and JS
 								curr._customHTML = EncodePHP(curr._customHTML, curr);
 								curr._customHTML = EncodeJS(curr._customHTML, curr);
+
+								// Check if the block is (now) global
+								var attr = $(curr._customHTML).attr("global");
+								if (typeof attr !== typeof undefined && attr !== false) {
+									// Check if the project has multiple pages
+									var multipage = ( Object.keys( mbrApp.Core.resultJSON ).length > 1 ? true : false );
+
+									// If the block wasn't global before, but it is now, we're going to add it to all pages
+									var addToAllPages = false;
+									if (multipage && !curr._global)
+										addToAllPages = true;
+
+									// Set the block as global (if it wasn't already so)
+									curr._global = true;
+
+									// Let's update this block on all pages
+									if (multipage) {
+										SaveGlobalBlock(addToAllPages);
+									}
+								}
+								else {
+									// If the "global" attribute was set, but is now removed, change the "_cid", so the block becomes unique
+									if (curr._global) {
+										var cid = GenerateCID();
+										curr._cid = cid;
+										curr._global = false;
+										curr._name = curr._name + "-1";	// Also required, otherwise if the user wants to delete the global block, this block goes too (unintentionally)
+									}
+								}
 
 								// Save
 								var currentPage = mbrApp.Core.currentPage;
@@ -245,7 +284,7 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 							html = html.replace("[php_code_" + i + "]", block._PHPplaceholders[i]);
 
 							// Remove the ="" after PHP closing tags, if the PHP is inside an HTML tag
-							html = html.replace(/\?>=""/ig, "?>").replace(/\?>=''/ig, "?>");
+							html = html.replace(/\?>=(""|'')/ig, "?>");
 						}
 					}
 
@@ -310,6 +349,70 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 					mbrApp.appSettings["witsec-code-editor-theme"] = t;
 				}
 
+				// Save a Global Block
+				function SaveGlobalBlock(addToAllPages) {
+					// Loop through all pages
+					for (var page in mbrApp.Core.resultJSON) {
+
+						// If a found page is the current page, skip it (we've already saved that)
+						if (page == mbrApp.Core.currentPage)
+							continue;
+
+						// Loop through all the components of the page
+						var compAnchor = "";
+						var compFound = false;
+						for (var comp in mbrApp.Core.resultJSON[page]["components"]) {
+							if ( mbrApp.Core.resultJSON[page]["components"][comp]["_cid"] == curr._cid || mbrApp.Core.resultJSON[page]["components"][comp]["_name"] == curr._name ) {
+								compFound = true;
+
+								// People like to be able to set page specific anchors for global blocks
+								compAnchor = mbrApp.Core.resultJSON[page]["components"][comp]["_anchor"];
+								mbrApp.Core.resultJSON[page]["components"][comp] = curr;
+								mbrApp.Core.resultJSON[page]["components"][comp]["_anchor"] = compAnchor;
+							}
+						}
+
+						// If the component wasn't found and the user wants this block to now become global, let's add it to the page
+						if (!compFound && addToAllPages) {
+							var size = mbrApp.Core.resultJSON[page].components.length;
+							mbrApp.Core.resultJSON[page].components[size] = curr;
+						}
+					}
+				}
+
+				// Function to generate a component ID
+				function GenerateCID() {
+					var cid = "";
+					var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+					// Loop until we get a unique CID (usually one go needed, but there's a super small chance you end up with a CID that already exists)
+					while (cid == "") {
+						// Generate random string
+						for (var i = 0; i < 10; i++) {
+							cid += chars.charAt(Math.floor(Math.random() * chars.length));
+						}
+
+						// Let's check if that CID already exists anywhere else in the project
+						var pages = mbrApp.Core.getPages();
+						for(var page in pages) {
+	
+							// Loop through all components of a page
+							for (i=0; i<pages[page]["components"].length; i++) {
+								if (cid == pages[page]["components"][i]["_cid"]) {
+									cid = "";
+									break;
+								}
+							}
+
+							// If CID is empty, we need to start over, so exit this loop
+							if (cid == "")
+								break;
+						}
+					}
+
+					// We're here, so we got ourselves a unique CID
+					return cid;
+				}
             }
         }
     })
