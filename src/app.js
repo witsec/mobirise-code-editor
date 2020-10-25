@@ -184,6 +184,9 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 									// Set the block as global (if it wasn't already so)
 									curr._global = true;
 
+									// Make the block's name unique, so it won't be incidentally deleted if another (global) block has the same name and gets deleted (or vice versa)
+									curr._name = curr._name + "-" + curr._cid;
+
 									// Let's update this block on all pages
 									if (multipage) {
 										SaveGlobalBlock(addToAllPages);
@@ -195,7 +198,7 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 										var cid = GenerateCID();
 										curr._cid = cid;
 										curr._global = false;
-										curr._name = curr._name + "-1";	// Also required, otherwise if the user wants to delete the global block, this block goes too (unintentionally)
+										curr._name = curr._name + "-" + cid;	// Also required, otherwise if the user wants to delete the global block, this block goes too (unintentionally)
 									}
 								}
 
