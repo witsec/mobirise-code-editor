@@ -362,7 +362,7 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 						var compAnchor = "";
 						var compFound = false;
 						for (var comp in mbrApp.Core.resultJSON[page]["components"]) {
-							if ( mbrApp.Core.resultJSON[page]["components"][comp]["_cid"] == curr._cid || mbrApp.Core.resultJSON[page]["components"][comp]["_name"] == curr._name ) {
+							if ( mbrApp.Core.resultJSON[page]["components"][comp]["_cid"] == curr._cid ) {
 								compFound = true;
 
 								// People like to be able to set page specific anchors for global blocks

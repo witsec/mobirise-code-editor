@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v6 (2020-10-25)
+
+- Fixed issue with editing/creating global blocks
+
 ## v5 (2020-10-03)
 
 - Fixed issue where you couldn't properly edit/select a footer if it had the 'always-bottom' attribute
