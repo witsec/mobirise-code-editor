@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Monaco Editor</title>
-	<link rel="stylesheet" data-name="vs/editor/editor.main" href="min/vs/editor/editor.main.min.css">
+	<link rel="stylesheet" data-name="vs/editor/editor.main" href="min/vs/editor/editor.main.css">
 	<meta charset="utf-8">
 </head>
 <body>
@@ -28,9 +28,9 @@ body, html {
 <div id="container"></div>
 
 <script>var require = { paths: { 'vs': 'min/vs' } };</script>
-<script src="min/vs/loader.min.js"></script>
-<script src="min/vs/editor/editor.main.nls.min.js"></script>
-<script src="min/vs/editor/editor.main.min.js"></script>
+<script src="min/vs/loader.js"></script>
+<script src="min/vs/editor/editor.main.nls.js"></script>
+<script src="min/vs/editor/editor.main.js"></script>
 
 <script>
 // Create the editor
@@ -46,6 +46,13 @@ var editor = monaco.editor.create(document.getElementById("container"), {
 window.onresize = function(){
 	editor.layout();
 };
+
+// Let the user know links can't be loaded
+window.open = function() {
+  parent.mbrApp.alertDlg("Unfortunately it's not possible to open this link.");
+  return true;
+}
+
 </script>
 
 </body>

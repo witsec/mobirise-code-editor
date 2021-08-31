@@ -55,8 +55,8 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 						'    <div class="witsec-code-editor-header">',
 						'      <h4 style="float:left; width:50%">CSS/LESS</h4>',
 						'      <h4 style="float:left; width:50%; text-align:right">',
-						'        <i class="mbr-icon-align-left witsec-code-editor-wrapbutton"  data-tooltipster="bottom" title="Toggle Wrap"></i>&nbsp;&nbsp;&nbsp;',
-						'        <i class="mbr-icon-sun        witsec-code-editor-themebutton" data-tooltipster="bottom" title="Toggle Theme"></i>',
+						'        <i class="mbr-icon-align-left witsec-code-editor-wrapbutton"  data-tooltipster="bottom" title="Toggle Wrap"  style="cursor:pointer"></i>&nbsp;&nbsp;&nbsp;',
+						'        <i class="mbr-icon-sun        witsec-code-editor-themebutton" data-tooltipster="bottom" title="Toggle Theme" style="cursor:pointer"></i>',
 						'      </h4>',
 						'    </div>',
 						'    <iframe id="witsec-code-editor-iframe-css" class="witsec-code-editor-iframe" src="' + monacoHtml + '" scrolling="no"></iframe>',
@@ -88,13 +88,14 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 						var comp = mbrApp.Core.resultJSON[mbrApp.Core.currentPage].components[index];
 
 						// We have to check if there's a footer with the 'always-bottom' attribute
-						var attr = $(comp._customHTML).attr("always-bottom");
-						if (comp._once == "footers" && typeof attr !== typeof undefined && attr !== false)	// Footer with always-bottom
+						var attrAB = $(comp._customHTML).attr("always-bottom");
+						var attrAT = $(comp._customHTML).attr("always-top");
+						if (comp._once == "footers" && typeof attrAB !== typeof undefined && attrAB !== false)		// Footer with always-bottom
 							footerIndex = index;
-						else if (comp._once == "menu")														// Menu
+						else if (comp._once == "menu" && typeof attrAT !== typeof undefined && attrAT !== false)	// Menu
 							compIndex.unshift(index);
 						else
-							compIndex.push(index);															// Any other block
+							compIndex.push(index);																	// Any other block
 					}
 
 					// If there was a footer with the 'always-bottom' attribute, add it last
@@ -170,6 +171,13 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 								curr._customHTML = EncodePHP(curr._customHTML, curr);
 								curr._customHTML = EncodeJS(curr._customHTML, curr);
 
+								// Check if LESS variables are present in MBR-PARAMETERS
+								let noexist = checkLessVars(curr._customHTML, ifrCSS.editor.getValue());
+								if (noexist) {
+									mbrApp.alertDlg("The following LESS variables are not present in &lt;mbr-parameters&gt;:<br><br><code>" + noexist.join("</code>, <code>") + "</code>");
+									return false;	
+								}
+
 								// Check if the block is (now) global
 								var attr = $(curr._customHTML).attr("global");
 								if (typeof attr !== typeof undefined && attr !== false) {
@@ -181,16 +189,16 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 									if (multipage && !curr._global)
 										addToAllPages = true;
 
+									// If the block wasn't global before, make the block's name unique, so it won't be incidentally deleted if another (global) block has the same name and gets deleted (or vice versa)
+									if (!curr._global)
+										curr._name = curr._name + "-" + curr._cid;
+
 									// Set the block as global (if it wasn't already so)
 									curr._global = true;
 
-									// Make the block's name unique, so it won't be incidentally deleted if another (global) block has the same name and gets deleted (or vice versa)
-									curr._name = curr._name + "-" + curr._cid;
-
 									// Let's update this block on all pages
-									if (multipage) {
+									if (multipage)
 										SaveGlobalBlock(addToAllPages);
-									}
 								}
 								else {
 									// If the "global" attribute was set, but is now removed, change the "_cid", so the block becomes unique
@@ -365,7 +373,8 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 						var compAnchor = "";
 						var compFound = false;
 						for (var comp in mbrApp.Core.resultJSON[page]["components"]) {
-							if ( mbrApp.Core.resultJSON[page]["components"][comp]["_cid"] == curr._cid ) {
+							// If the _cid or _name matches AND the block is global, go for it
+							if ( (mbrApp.Core.resultJSON[page]["components"][comp]["_cid"] == curr._cid || mbrApp.Core.resultJSON[page]["components"][comp]["_name"] == curr._name) && mbrApp.Core.resultJSON[page]["components"][comp]["_global"] ) {
 								compFound = true;
 
 								// People like to be able to set page specific anchors for global blocks

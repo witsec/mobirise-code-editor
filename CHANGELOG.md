@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## v7 (2021-08-31)
+
+- Fixed issue where a global block's name would get a longer name after each edit
+- Fixed issue with editing a footer block, sometimes it would open the wrong block
+- Fixed issue with editing a menu block, if said block wasn't on top
+- Updated Monaco Editor to v0.27.0
+- Added check if used LESS variables are present in `<mbr-parameters>`
+
 ## v6 (2020-10-25)
 
 - Fixed issue with editing/creating global blocks
