@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## v7.1 (2021-09-12)
+
+- Fixed issue with simple LESS check regarding at-rules and style variables
+- Fixed issue where Monaco editor wouldn't load properly anymore in Mobirise 4 (due to a minimized Monaco file, don't ask)
+
 ## v7 (2021-08-31)
 
 - Fixed issue where a global block's name would get a longer name after each edit

@@ -53,6 +53,13 @@ function checkLessVars(html, css) {
 		vars[i] = v.replace(/@/g, "").replace(/{/g, "").replace(/^bg-.+$/, "bg");
 	});
 
+	// Remove at-rules, style variables and other 'reserved' words
+	let reserved = ["charset", "color-profile", "counter-style", "document", "font-face", "font-feature-values", "import", "keyframes", "media", "namespace", "page", "property", "supports", "viewport"];
+	reserved = reserved.concat(["arrowColor", "dangerColor", "display1Font", "display1Size", "display2Font", "display2Size", "display4Font", "display4Size", "display5Font", "display5Size", "display7Font", "display7Size", "infoColor", "isAnimatedOnScroll", "isGhostButtonBorder", "isRoundedButtons", "isScrollToTopButton", "mainFont", "primaryColor", "secondaryColor", "successColor", "underlinedLinks", "warningColor"]);
+	vars = vars.filter(function(el) {
+		return reserved.indexOf(el) < 0;
+	});
+
 	// Remove duplicates
 	vars = vars.filter((a, b) => vars.indexOf(a) === b)
 

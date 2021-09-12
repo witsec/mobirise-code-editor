@@ -175,7 +175,7 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 								let noexist = checkLessVars(curr._customHTML, ifrCSS.editor.getValue());
 								if (noexist) {
 									mbrApp.alertDlg("The following LESS variables are not present in &lt;mbr-parameters&gt;:<br><br><code>" + noexist.join("</code>, <code>") + "</code>");
-									return false;	
+									return false;
 								}
 
 								// Check if the block is (now) global
