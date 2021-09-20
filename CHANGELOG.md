@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v7.2 (2021-09-20)
+
+- Disabled LESS syntax checks, they need to be improved
+
 ## v7.1 (2021-09-12)
 
 - Fixed issue with simple LESS check regarding at-rules and style variables

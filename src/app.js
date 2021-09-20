@@ -172,11 +172,13 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 								curr._customHTML = EncodeJS(curr._customHTML, curr);
 
 								// Check if LESS variables are present in MBR-PARAMETERS
+								/*
 								let noexist = checkLessVars(curr._customHTML, ifrCSS.editor.getValue());
 								if (noexist) {
 									mbrApp.alertDlg("The following LESS variables are not present in &lt;mbr-parameters&gt;:<br><br><code>" + noexist.join("</code>, <code>") + "</code>");
 									return false;
 								}
+								*/
 
 								// Check if the block is (now) global
 								var attr = $(curr._customHTML).attr("global");
