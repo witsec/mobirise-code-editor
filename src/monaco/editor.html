@@ -47,9 +47,9 @@ window.onresize = function(){
 	editor.layout();
 };
 
-// Let the user know links can't be loaded
+// Open a link
 window.open = function() {
-  parent.mbrApp.alertDlg("Unfortunately it's not possible to open this link.");
+  parent.mbrApp.openUrl(arguments[0]);
   return true;
 }
 

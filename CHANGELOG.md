@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## v7.3 (2022-08-03)
+
+- Fixed the HTML block, where the code logo would appear to be huge in M5 themes
+- Updated editor window, so that you can now open links to help pages
+
 ## v7.2 (2021-09-20)
 
 - Disabled LESS syntax checks, they need to be improved

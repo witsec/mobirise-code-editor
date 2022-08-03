@@ -1,7 +1,7 @@
 {
-    "name": "Code Editor v7.2",
+    "name": "Code Editor v7.3",
     "alias": "witsec-code-editor",
-    "version": 7.2,
+    "version": 7.3,
     "minAppVersion": "4.7.7",
     "appScript": true,
     "components" : [
@@ -16,5 +16,6 @@
         "css/style.css"
     ],
     "description":"Edit the HTML and CSS of any M4, M5 or AMP block you like. <a href='https://witsec.nl'>Learn more...</a>",
-	"logo":"thumbnail.svg"
+    "largeCover": "cover.jpg",
+    "logo" : "thumbnail.jpg"
 }
