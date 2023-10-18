@@ -16,7 +16,7 @@ defineM("witsec-code-editor", function(jQuery, mbrApp, tr) {
 					var h = jQuery(a);
 
 					// Add edit button to component buttons
-					var btn = '<span class="mbr-btn mbr-btn-default mbr-icon-code witsec-code-editor-editbutton" data-tooltipster="bottom" title="Edit Block"></span><style>.witsec-code-editor-editbutton:hover { background-color: #42a5f5 !important; color: #fff !important }</style>';
+					var btn = '<span class="mbr-btn mbr-btn-default witsec-code-editor-editbutton mbrib-setting3" data-tooltipster="bottom" title="Edit Block"></span><style>.witsec-code-editor-editbutton {font-size: 24px !important; padding-top: 0px !important;} .witsec-code-editor-editbutton:hover { background-color: #42a5f5 !important; color: #fff !important }</style>';
 					if (h.find(".component-params").length)
 						h.find(".component-params").before(btn);
 					else if (h.find(".component-remove").length)
