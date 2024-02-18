@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v7.4 (2024-02-18)
+
+- Updated editor icon, so you don't mix up with the official editor's icon
+
 ## v7.3 (2022-08-03)
 
 - Fixed the HTML block, where the code logo would appear to be huge in M5 themes

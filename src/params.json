@@ -1,7 +1,7 @@
 {
-    "name": "Code Editor v7.3",
+    "name": "Code Editor v7.4",
     "alias": "witsec-code-editor",
-    "version": 7.3,
+    "version": 7.4,
     "minAppVersion": "4.7.7",
     "appScript": true,
     "components" : [
